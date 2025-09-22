@@ -79,9 +79,39 @@ app.use("/signin", signinRouter );
 
 
 //test session
-app.get('/api/me', (req,res) => {
-  res.json({ account: req.user || null });
+// app.get('/api/me', (req,res) => {
+//   res.json({ account: req.user || null });
+// });
+
+app.get('/api/me', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.json({ success: false, account: null, organization: null });
+    }
+
+    // req.user should already be whatever you returned from your LocalStrategy
+    const account = {
+      account_id: req.user.account_id,
+      email: req.user.email,
+      role: req.user.role
+    };
+
+    // fetch org if needed
+    let org = null;
+    if (account.role === 'organization') {
+      const { rows } = await pool.query(
+        'SELECT * FROM organizations WHERE account_id = $1',
+        [account.account_id]
+      );
+      org = rows[0] || null;
+    }
+
+    res.json({ success: true, account, organization: org });
+  } catch (err) {
+    next(err);
+  }
 });
+
 
 
 //logout to be implemented later
