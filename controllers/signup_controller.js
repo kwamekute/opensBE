@@ -24,10 +24,10 @@ exports.postSignup = async (req, res, next) => {
 
   try {
     // hash the password
-    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     await client.query("BEGIN");
 
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     //  Create the account
     const insertAccountQuery = `
@@ -66,15 +66,17 @@ exports.postSignup = async (req, res, next) => {
     // 3️⃣ Log them in immediately
     req.login(account, (err) => {
       if (err) return next(err);
-      res.json({
-        success: true,
-        account,
-        organization: org,
-      }); //return the account details
+      res.json({ success: true, account, organization: org });
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    next(err);
+    // if duplicate email:
+    if (err.code === "23505") {
+      // Unique violation
+      res.status(409).json({ error: "Email already exists" });
+    } else {
+      next(err);
+    }
   } finally {
     client.release();
   }
