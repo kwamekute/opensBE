@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const signupRouter = require("./routes/signup_router");
 const signinRouter = require("./routes/signin_router");
+const listingRouter =require("./listing_routesroutes/");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -76,6 +77,9 @@ app.use("/signup", signupRouter);
 
 //signin Mount
 app.use("/signin", signinRouter );
+
+//Listing Mount
+app.use("/listing", )
 
 
 //test session
