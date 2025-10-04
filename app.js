@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const signupRouter = require("./routes/signup_router");
 const signinRouter = require("./routes/signin_router");
-const listingRouter =require("./listing_routesroutes/");
+const listingRouter =require("./routes/listing_router");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -79,7 +79,7 @@ app.use("/signup", signupRouter);
 app.use("/signin", signinRouter );
 
 //Listing Mount
-app.use("/listing", )
+app.use("/listing",listingRouter );
 
 
 //test session
