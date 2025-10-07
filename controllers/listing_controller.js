@@ -97,10 +97,13 @@ exports.getListingsByOrg = async (req, res) => {
       [orgId]
     );
 
+    console.log(result);
+
     // ✅ Respond safely
     return res.json({
       success: true,
       listings: result.rows || [],
+      
     });
   } catch (err) {
     console.error("Error fetching listings by organization:", err);
@@ -108,5 +111,21 @@ exports.getListingsByOrg = async (req, res) => {
       success: false,
       message: "Server error while fetching organization listings",
     });
+  }
+};
+
+//filtered listings
+  
+exports.getFilteredListings = async (req, res) => {
+  const { city } = req.body;
+  try {
+    const listings = await pool.query(
+      "SELECT * FROM listings WHERE LOWER(city) LIKE LOWER($1)",
+      [`%${city}%`]
+    );
+    res.json({ success: true, listings: listings.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
