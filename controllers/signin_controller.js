@@ -54,6 +54,26 @@ exports.postSignin = (req, res, next) => {
   })(req, res, next);
 };
 
+//logout
+
+exports.logout = (req, res, next) => {
+  // 🟦 Passport's built-in logout (for session cleanup)
+  req.logout(function (err) {
+    if (err) return next(err);
+
+    // 🟦 Destroy the session explicitly
+    req.session.destroy((sessionErr) => {
+      if (sessionErr) return next(sessionErr);
+
+      // 🟦 Clear the cookie from the client
+      res.clearCookie("connect.sid");
+
+      // 🟦 Send success response
+      res.json({ success: true, message: "Logged out successfully" });
+    });
+  });
+};
+
 // const passport = require("passport");
 // const pool = require("../db/pool");
 
