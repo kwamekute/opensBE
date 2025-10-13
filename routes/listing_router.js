@@ -10,7 +10,6 @@ listingRouter.get("/:id", listingController.getListingById);
 
 listingRouter.get("/", listingController.getListings);
 listingRouter.post("/", listingController.postListing);
-//listingRouter.post("/:id/photos", listingController.addListingPhotos);
 
 
 module.exports = listingRouter;

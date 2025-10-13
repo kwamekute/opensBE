@@ -1,9 +1,10 @@
 
-const pool = require("../db/pool"); // your PostgreSQL pool
+const pool = require("../db/pool"); 
 const nodemailer = require("nodemailer");
 
+
 const transporter = nodemailer.createTransport({
-  service: "gmail", // or SMTP settings for production
+  service: "gmail", 
   auth: {
     user: "opensanctuarybookings@gmail.com",
     pass: "fqkl nqvd cdzo ucyv"
@@ -18,12 +19,12 @@ exports.postRequest = async (req, res) => {
       email, 
       phone, 
       organization,
-      check_in,  // e.g. "2025-11-14T14:00:00Z"
-      check_out // e.g. "2025-11-16T11:00:00Z"
+      check_in, 
+      check_out 
     } = req.body;
 
 
-    // ✅ Insert into DB with timestamps
+    //Insert request
     const result = await pool.query(
       `INSERT INTO requests 
        (listing_id, name, email, phone,organization, check_in, check_out)
@@ -33,7 +34,7 @@ exports.postRequest = async (req, res) => {
 
     const request = result.rows[0];
 
-    // ✅ Send email with formatted datetime
+    // Send email with formatted datetime
     const mailOptions = {
       from: `"Sanctuary Stays" <opensanctuarybookings@gmail.com>`,
       to: email,
@@ -65,7 +66,6 @@ exports.postRequest = async (req, res) => {
 };
 
 //get requests
-
 exports.getRequests = async (req, res) => {
   try {
     if (!req.session || !req.session.organization_id) {

@@ -10,12 +10,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 const pool = require("./db/pool");
-//const path = require("path");
-// const { fileURLToPath } = require("url");
 
-// //file paths
-// const reactBuildPath = path.join(__dirname, "../opensanctuaryFE/dist");
-// app.use(express.static(reactBuildPath));
 
 
 // allow React frontend to call API & send cookies
@@ -73,38 +68,25 @@ passport.deserializeUser(async (id, done) => {
 
 
 
-//signup Mount
+//Routes Mounts
 app.use("/signup", signupRouter);
-
-//signin Mount
 app.use("/signin", signinRouter );
-
-//Listing Mount
 app.use("/listing",listingRouter );
-
-//request Mount
 app.use("/request", requestRouter);
 
 
-//test session
-// app.get('/api/me', (req,res) => {
-//   res.json({ account: req.user || null });
-// });
-
+//Access to session and linked users
 app.get('/api/me', async (req, res, next) => {
   try {
     if (!req.user) {
       return res.json({ success: false, account: null, organization: null });
     }
 
-    // req.user should already be whatever you returned from your LocalStrategy
     const account = {
       account_id: req.user.account_id,
       email: req.user.email,
       role: req.user.role
     };
-
-    // fetch org if needed
     let org = null;
     if (account.role === 'organization') {
       const { rows } = await pool.query(
@@ -120,16 +102,7 @@ app.get('/api/me', async (req, res, next) => {
   }
 });
 
-
-
-//logout to be implemented later
-// app.post('/api/logout', (req, res, next) => {
-//   req.logout(function (err) {
-//     if (err) return next(err);
-//     res.json({ success: true });
-//   });
-// });
-
+//Port 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`App running - listening on port ${PORT}...`);

@@ -1,11 +1,6 @@
-// controllers/authController.js
 const bcrypt = require("bcryptjs");
 const pool = require("../db/pool");
 
-// Render signup form
-// exports.getSignup = (req, res) => {
-//   res.render("sign-up");
-// };
 
 // Handle signup form POST
 exports.postSignup = async (req, res, next) => {
@@ -63,7 +58,7 @@ exports.postSignup = async (req, res, next) => {
 
     await client.query("COMMIT");
 
-    // 3️⃣ Log them in immediately
+    // Log them in immediately
     req.login(account, (err) => {
       if (err) return next(err);
       res.json({ success: true, account, organization: org });

@@ -5,7 +5,6 @@ exports.postListing = async (req, res) => {
   const client = await pool.connect();
   try {
     const { orgId,description, city, latitude, longitude, amenities, price, photos, capacity } = req.body;
-console.log(req.body);
     if (!photos || !Array.isArray(photos) || photos.length === 0) {
       return res.status(400).json({ error: "At least one photo is required" });
     }
@@ -60,8 +59,7 @@ exports.getListingById = async (req, res) => {
 
     const listing = result.rows[0];
 
-    // ✅ Ensure Cloudinary image URLs are returned properly
-    // If you store images in a JSON/array column named "images", this ensures it's parsed correctly
+    // Ensure Cloudinary image URLs are returned properly
     if (typeof listing.images === "string") {
       try {
         listing.images = JSON.parse(listing.images);
@@ -91,7 +89,7 @@ exports.getListingsByOrg = async (req, res) => {
     const orgId = req.session.organization_id;
     console.log("Organization ID from session:", orgId);
 
-    // ✅ Fetch listings for this organization
+    // Fetch listings for this organization
     const result = await pool.query(
       `SELECT * FROM listings WHERE organization_id = $1 ORDER BY listing_id DESC`,
       [orgId]
@@ -99,7 +97,7 @@ exports.getListingsByOrg = async (req, res) => {
 
     console.log(result);
 
-    // ✅ Respond safely
+    // Respond safely
     return res.json({
       success: true,
       listings: result.rows || [],
@@ -114,8 +112,7 @@ exports.getListingsByOrg = async (req, res) => {
   }
 };
 
-//filtered listings
-  
+//filtered listings 
 exports.getFilteredListings = async (req, res) => {
   const { city } = req.body;
   try {
