@@ -1,13 +1,13 @@
-
+require('dotenv').config();
 const pool = require("../db/pool"); 
 const nodemailer = require("nodemailer");
 
 
 const transporter = nodemailer.createTransport({
   service: "gmail", 
-  auth: {
-    user: "opensanctuarybookings@gmail.com",
-    pass: "fqkl nqvd cdzo ucyv"
+ auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
