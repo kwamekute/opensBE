@@ -104,6 +104,6 @@ app.get('/api/me', async (req, res, next) => {
 
 //Port 
 const PORT = 3000;
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`App running - listening on port ${PORT}...`);
 });
