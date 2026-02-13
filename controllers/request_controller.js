@@ -3,13 +3,23 @@ const pool = require("../db/pool");
 const nodemailer = require("nodemailer");
 
 
+// const transporter = nodemailer.createTransport({
+//   service: "gmail", 
+//  auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   }
+// });
 const transporter = nodemailer.createTransport({
-  service: "gmail", 
- auth: {
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+  secure: false,
+  auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
 });
+
 
 exports.postRequest = async (req, res) => {
   try {
