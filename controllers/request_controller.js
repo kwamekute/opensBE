@@ -1,90 +1,64 @@
 require('dotenv').config();
 const pool = require("../db/pool"); 
-const nodemailer = require("nodemailer");
+const Mailjet = require('node-mailjet');
 
-
-// const transporter = nodemailer.createTransport({
-//   service: "gmail", 
-//  auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS
-//   }
-// });
-// const transporter = nodemailer.createTransport({
-//   host: process.env.SMTP_HOST || "smtp.gmail.com",
-//   port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-//   secure: false,
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS
-//   },
-// });
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+const mailjet = new Mailjet({
+  apiKey: process.env.EMAIL_USER,
+  apiSecret: process.env.EMAIL_PASS
 });
-console.log("SMTP_HOST:", process.env.SMTP_HOST);
-console.log("SMTP_PORT:", process.env.SMTP_PORT);
 
 exports.postRequest = async (req, res) => {
   try {
-    const { 
-      listing_id, 
-      name, 
-      email, 
-      phone, 
-      organization,
-      check_in, 
-      check_out 
-    } = req.body;
+    const { listing_id, name, email, phone, organization, check_in, check_out } = req.body;
 
-
-    //Insert request
-    const result = await pool.query(
+    // 1️⃣ Insert request into database
+    const dbResult = await pool.query(
       `INSERT INTO requests 
-       (listing_id, name, email, phone,organization, check_in, check_out)
+       (listing_id, name, email, phone, organization, check_in, check_out)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [listing_id, name, email, phone,organization, check_in, check_out]
+      [listing_id, name, email, phone, organization, check_in, check_out]
     );
 
-    const request = result.rows[0];
+    const request = dbResult.rows[0]; // ✅ now defined
 
-    // Send email with formatted datetime
-    const mailOptions = {
-      from: `"Sanctuary Stays" <your_mailjet_verified_address@mailjet.com>`,
-      to: email,
-      subject: `Your Request Has Been Received`,
-      html: `
-        <div style="font-family: Arial, sans-serif; background-color:#f9f9f9; padding:20px;">
-          <div style="max-width:600px; margin:0 auto; background:#fff; padding:20px; border-radius:8px;">
-            <h2 style="color:#2E8B57;">Thank you, ${name}!</h2>
-            <p>We’ve received your request for the Listing.</p>
+    // 2️⃣ Send email via Mailjet API (once)
+    const mailResult = await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: { Email: process.env.MAILJET_VERIFIED_EMAIL, Name: "Sanctuary Stays" },
+          To: [{ Email: email, Name: name }],
+          Subject: "Your Request Has Been Received",
+          HTMLPart: `
+            <div style="font-family: Arial, sans-serif; background-color:#f9f9f9; padding:20px;">
+              <div style="max-width:600px; margin:0 auto; background:#fff; padding:20px; border-radius:8px;">
+                <h2 style="color:#2E8B57;">Thank you, ${name}!</h2>
+                <p>We’ve received your request for the Listing.</p>
+                <div style="margin-top:15px;">
+                  <p><strong>Check-in:</strong> ${new Date(check_in).toLocaleString()}</p>
+                  <p><strong>Check-out:</strong> ${new Date(check_out).toLocaleString()}</p>
+                </div>
+                <p style="margin-top:20px;">We’ll get back to you shortly with confirmation and next steps.</p>
+              </div>
+            </div>`
+        }
+      ]
+    });
 
-            <div style="margin-top:15px;">
-              <p><strong>Check-in:</strong> ${new Date(check_in).toLocaleString()}</p>
-              <p><strong>Check-out:</strong> ${new Date(check_out).toLocaleString()}</p>
-            </div>
+    console.log("Mailjet result:", JSON.stringify(mailResult.body, null, 2));
 
-            <p style="margin-top:20px;">We’ll get back to you shortly with confirmation and next steps.</p>
-          </div>
-        </div>
-      `
-    };
+    // 3️⃣ Return the inserted request in response
+    res.status(201).json({
+      success: true,
+      message: "Request created and email sent",
+      request
+    });
 
-    await transporter.sendMail(mailOptions);
-
-    res.status(201).json({ success: true, message: "Request created and email sent", request });
   } catch (error) {
     console.error("Error creating request:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 
 //get requests
 exports.getRequests = async (req, res) => {
