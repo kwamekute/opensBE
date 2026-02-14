@@ -10,16 +10,27 @@ const nodemailer = require("nodemailer");
 //     pass: process.env.EMAIL_PASS
 //   }
 // });
+// const transporter = nodemailer.createTransport({
+//   host: process.env.SMTP_HOST || "smtp.gmail.com",
+//   port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+//   secure: false,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   },
+// });
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
   secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_PASS,
   },
 });
-
+console.log("SMTP_HOST:", process.env.SMTP_HOST);
+console.log("SMTP_PORT:", process.env.SMTP_PORT);
 
 exports.postRequest = async (req, res) => {
   try {
@@ -46,7 +57,7 @@ exports.postRequest = async (req, res) => {
 
     // Send email with formatted datetime
     const mailOptions = {
-      from: `"Sanctuary Stays" <opensanctuarybookings@gmail.com>`,
+      from: `"Sanctuary Stays" <your_mailjet_verified_address@mailjet.com>`,
       to: email,
       subject: `Your Request Has Been Received`,
       html: `
